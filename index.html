@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安徽卫生健康职业学院 — 志愿填报测算</title>
+  <style>
+    :root {
+      --primary: #1A6B5A;
+      --primary-dark: #145244;
+      --primary-light: #e8f3f0;
+      --chong: #F5A623;
+      --wen: #7ED321;
+      --bao: #4A90E2;
+      --bg: #F5F7FA;
+      --surface: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --rule: #e5e7eb;
+      --shadow: 0 8px 32px rgba(26, 107, 90, 0.12);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    header .motto {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      letter-spacing: 0.15em;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    #input-panel {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem 1.5rem;
+      max-width: 480px;
+      margin: 0 auto 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.375rem;
+    }
+
+    .form-group select,
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1.5px solid var(--rule);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 107, 90, 0.15);
+    }
+
+    .form-group input::placeholder {
+      color: #9ca3af;
+    }
+
+    .btn-calculate {
+      width: 100%;
+      padding: 0.875rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-calculate:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-calculate:active {
+      transform: scale(0.98);
+    }
+
+    .error-msg {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      min-height: 1.25rem;
+    }
+
+    .rank-info {
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--primary-light);
+      border-radius: 8px;
+      color: var(--primary-dark);
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .rank-info.visible {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #result-summary {
+      display: none;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    #result-summary.visible {
+      display: flex;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .badge .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .badge.chong .dot { background: var(--chong); }
+    .badge.wen .dot { background: var(--wen); }
+    .badge.bao .dot { background: var(--bao); }
+
+    #result-lists {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    #result-lists.visible {
+      display: grid;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .category-section {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .category-header.chong { background: var(--chong); }
+    .category-header.wen { background: var(--wen); }
+    .category-header.bao { background: var(--bao); }
+
+    .category-body {
+      padding: 0.75rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-top: 4px solid transparent;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .card.chong { border-top-color: var(--chong); }
+    .card.wen { border-top-color: var(--wen); }
+    .card.bao { border-top-color: var(--bao); }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+
+    .card-requirement {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+      header .motto {
+        font-size: 0.85rem;
+      }
+      main {
+        padding: 1.25rem 0.75rem;
+      }
+      #input-panel {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>安徽卫生健康职业学院</h1>
+    <p class="motto">笃学 · 精业 · 仁爱 · 济世</p>
+  </header>
+
+  <main>
+    <section id="input-panel">
+      <div class="form-group">
+        <label for="track">选择科类</label>
+        <select id="track">
+          <option value="物理">物理</option>
+          <option value="历史">历史</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="score">2026年高考分数（200 - 750）</label>
+        <input type="number" id="score" min="200" max="750" placeholder="请输入您的2026年分数">
+      </div>
+      <button class="btn-calculate" id="btnCalculate">测算</button>
+      <div class="error-msg" id="errorMsg"></div>
+      <div class="rank-info" id="rankInfo"></div>
+    </section>
+
+    <section id="result-summary">
+      <span class="badge chong"><span class="dot"></span>冲 <strong id="countChong">0</strong></span>
+      <span class="badge wen"><span class="dot"></span>稳 <strong id="countWen">0</strong></span>
+      <span class="badge bao"><span class="dot"></span>保 <strong id="countBao">0</strong></span>
+    </section>
+
+    <section id="result-lists">
+      <div class="category-section">
+        <div class="category-header chong">冲 — 冲刺专业</div>
+        <div class="category-body" id="listChong"></div>
+      </div>
+      <div class="category-section">
+        <div class="category-header wen">稳 — 稳妥专业</div>
+        <div class="category-body" id="listWen"></div>
+      </div>
+      <div class="category-section">
+        <div class="category-header bao">保 — 保底专业</div>
+        <div class="category-body" id="listBao"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    数据来源：2026年安徽省高考一分一段表、2025年该校录取数据。本工具仅供参考，实际录取请以官方公布为准。
+  </footer>
+
+  <script>
+    (function() {
+      // 2026年安徽省高考一分一段表
+      const rankTablePhysics = {"330": 298547, "331": 298176, "332": 298176, "333": 297795, "334": 297391, "335": 296968, "336": 296556, "337": 296172, "338": 295747, "339": 295349, "340": 294923, "341": 294467, "342": 293998, "343": 293559, "344": 293106, "345": 292658, "346": 292155, "347": 291704, "348": 291228, "349": 290753, "350": 290293, "351": 289839, "352": 289358, "353": 288843, "354": 288325, "355": 287816, "356": 287293, "357": 286714, "358": 286141, "359": 285647, "360": 285091, "361": 284514, "362": 283950, "363": 283351, "364": 282800, "365": 282200, "366": 281577, "367": 281013, "368": 280384, "369": 279727, "370": 279080, "371": 278457, "372": 277796, "373": 277141, "374": 276482, "375": 275835, "376": 275141, "377": 274506, "378": 273834, "379": 273133, "380": 272479, "381": 271779, "382": 271091, "383": 270401, "384": 269724, "385": 269012, "386": 268291, "387": 267563, "388": 266868, "389": 266163, "390": 265448, "391": 264686, "392": 263919, "393": 263162, "394": 262398, "395": 261639, "396": 260831, "397": 260014, "398": 259155, "399": 258327, "400": 257480, "401": 256701, "402": 255878, "403": 255041, "404": 254213, "405": 253350, "406": 252460, "407": 251593, "408": 250677, "409": 249799, "410": 248916};
+      const rankTableHistory = {"320": 120316, "321": 120007, "322": 119702, "323": 119371, "324": 119047, "325": 118706, "326": 118411, "327": 118104, "328": 117749, "329": 117409, "330": 117065, "331": 116719, "332": 116361, "333": 116011, "334": 115671, "335": 115310, "336": 114951, "337": 114554, "338": 114170, "339": 113789, "340": 113416, "341": 113019, "342": 112683, "343": 112308, "344": 111924, "345": 111524, "346": 111161, "347": 110770, "348": 110361, "349": 109958, "350": 109513, "351": 109091, "352": 108726, "353": 108300, "354": 107871, "355": 107440, "356": 106985, "357": 106513, "358": 106057, "359": 105620, "360": 105151, "361": 104715, "362": 104246, "363": 103771, "364": 103300, "365": 102795, "366": 102307, "367": 101810, "368": 101295, "369": 100838, "370": 100359, "371": 99850, "372": 99351, "373": 98869, "374": 98404, "375": 97896, "376": 97345, "377": 96849, "378": 96340, "379": 95835, "380": 95309, "381": 94816, "382": 94352, "383": 93821, "384": 93295, "385": 92777, "386": 92231, "387": 91682, "388": 91143, "389": 90635, "390": 90117, "391": 89610, "392": 89092, "393": 88566, "394": 88065, "395": 87541, "396": 87027, "397": 86534, "398": 86034, "399": 85497, "400": 85010, "401": 84473, "402": 83927, "403": 83403, "404": 82890, "405": 82377, "406": 81821, "407": 81273, "408": 80755, "409": 80225, "410": 79704, "411": 79125, "412": 78611, "413": 78072, "414": 77517, "415": 76984, "416": 76478, "417": 75905, "418": 75387, "419": 74854, "420": 74308};
+
+      // 2025年录取数据
+      const physicsData = [{"major": "眼视光技术", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 410, "min_rank": 248916, "batch": "专科批"}, {"major": "口腔医学技术", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 368, "min_rank": 280384, "batch": "专科批"}, {"major": "医学美容技术", "requirement": "专业组002-物+不限，不招色盲色弱，建议女生", "min_score": 365, "min_rank": 282200, "batch": "专科批"}, {"major": "医学影像技术", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 350, "min_rank": 290293, "batch": "专科批"}, {"major": "康复治疗技术", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 349, "min_rank": 290753, "batch": "专科批"}, {"major": "中医养生保健", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 349, "min_rank": 290753, "batch": "专科批"}, {"major": "药学", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 348, "min_rank": 291228, "batch": "专科批"}, {"major": "医疗器械维护与管理", "requirement": "专业组002-物+不限", "min_score": 343, "min_rank": 293545, "batch": "专科批"}, {"major": "药品经营与管理", "requirement": "专业组002-物+不限", "min_score": 342, "min_rank": 293998, "batch": "专科批"}, {"major": "药品生产技术", "requirement": "专业组002-物+不限", "min_score": 342, "min_rank": 293998, "batch": "专科批"}, {"major": "医学检验技术", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 340, "min_rank": 294923, "batch": "专科批"}, {"major": "预防医学", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 338, "min_rank": 295747, "batch": "专科批"}, {"major": "职业健康安全技术", "requirement": "专业组002-物+不限", "min_score": 338, "min_rank": 295747, "batch": "专科批"}, {"major": "社区管理与服务", "requirement": "专业组002-物+不限", "min_score": 338, "min_rank": 295747, "batch": "专科批"}, {"major": "旅游管理", "requirement": "专业组002-物+不限", "min_score": 338, "min_rank": 295747, "batch": "专科批"}, {"major": "医学营养", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 338, "min_rank": 295747, "batch": "专科批"}, {"major": "健康管理", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 338, "min_rank": 295747, "batch": "专科批"}, {"major": "智慧健康养老服务与管理", "requirement": "专业组002-物+不限", "min_score": 337, "min_rank": 296172, "batch": "专科批"}, {"major": "护理", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 337, "min_rank": 296172, "batch": "专科批"}, {"major": "婴幼儿托育服务与管理", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 337, "min_rank": 296172, "batch": "专科批"}, {"major": "卫生检验与检疫技术", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 337, "min_rank": 296172, "batch": "专科批"}, {"major": "卫生信息管理", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 337, "min_rank": 296172, "batch": "专科批"}, {"major": "助产", "requirement": "专业组002-物+不限，不招色盲色弱，建议女生", "min_score": 337, "min_rank": 296172, "batch": "专科批"}, {"major": "临床医学", "requirement": "专业组002-物+不限，不招色盲色弱", "min_score": 337, "min_rank": 296172, "batch": "专科批"}];
+      const historyData = [{"major": "眼视光技术", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 420, "min_rank": 74308, "batch": "专科批"}, {"major": "口腔医学技术", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 384, "min_rank": 93295, "batch": "专科批"}, {"major": "医学美容技术", "requirement": "专业组001-史+不限，不招色盲色弱，建议女生", "min_score": 374, "min_rank": 98404, "batch": "专科批"}, {"major": "中医养生保健", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 373, "min_rank": 98869, "batch": "专科批"}, {"major": "医学影像技术", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 359, "min_rank": 105620, "batch": "专科批"}, {"major": "康复治疗技术", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 358, "min_rank": 106057, "batch": "专科批"}, {"major": "医疗器械维护与管理", "requirement": "专业组001-史+不限", "min_score": 358, "min_rank": 106057, "batch": "专科批"}, {"major": "药品生产技术", "requirement": "专业组001-史+不限", "min_score": 350, "min_rank": 109513, "batch": "专科批"}, {"major": "药学", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 348, "min_rank": 110361, "batch": "专科批"}, {"major": "职业健康安全技术", "requirement": "专业组001-史+不限", "min_score": 344, "min_rank": 111924, "batch": "专科批"}, {"major": "药品经营与管理", "requirement": "专业组001-史+不限", "min_score": 343, "min_rank": 112308, "batch": "专科批"}, {"major": "社区管理与服务", "requirement": "专业组001-史+不限", "min_score": 342, "min_rank": 112683, "batch": "专科批"}, {"major": "旅游管理", "requirement": "专业组001-史+不限", "min_score": 342, "min_rank": 112683, "batch": "专科批"}, {"major": "卫生检验与检疫技术", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 342, "min_rank": 112683, "batch": "专科批"}, {"major": "预防医学", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 341, "min_rank": 113019, "batch": "专科批"}, {"major": "智慧健康养老服务与管理", "requirement": "专业组001-史+不限", "min_score": 341, "min_rank": 113019, "batch": "专科批"}, {"major": "助产", "requirement": "专业组001-史+不限，不招色盲色弱，建议女生", "min_score": 341, "min_rank": 113019, "batch": "专科批"}, {"major": "健康管理", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 341, "min_rank": 113019, "batch": "专科批"}, {"major": "临床医学", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 341, "min_rank": 113019, "batch": "专科批"}, {"major": "护理", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 340, "min_rank": 113416, "batch": "专科批"}, {"major": "婴幼儿托育服务与管理", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 340, "min_rank": 113416, "batch": "专科批"}, {"major": "卫生信息管理", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 340, "min_rank": 113416, "batch": "专科批"}, {"major": "医学营养", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 340, "min_rank": 113416, "batch": "专科批"}, {"major": "医学检验技术", "requirement": "专业组001-史+不限，不招色盲色弱", "min_score": 340, "min_rank": 113416, "batch": "专科批"}];
+
+      const trackEl = document.getElementById('track');
+      const scoreEl = document.getElementById('score');
+      const btnEl = document.getElementById('btnCalculate');
+      const errorEl = document.getElementById('errorMsg');
+      const rankInfoEl = document.getElementById('rankInfo');
+      const summaryEl = document.getElementById('result-summary');
+      const resultListsEl = document.getElementById('result-lists');
+      const countChongEl = document.getElementById('countChong');
+      const countWenEl = document.getElementById('countWen');
+      const countBaoEl = document.getElementById('countBao');
+      const listChongEl = document.getElementById('listChong');
+      const listWenEl = document.getElementById('listWen');
+      const listBaoEl = document.getElementById('listBao');
+
+      function showError(msg) {
+        errorEl.textContent = msg;
+        rankInfoEl.classList.remove('visible');
+      }
+
+      function clearError() {
+        errorEl.textContent = '';
+      }
+
+      function validate() {
+        const score = parseFloat(scoreEl.value);
+        if (isNaN(score) || scoreEl.value.trim() === '') {
+          showError('请输入有效分数');
+          return null;
+        }
+        if (score < 200 || score > 750) {
+          showError('分数需在 200 - 750 之间');
+          return null;
+        }
+        clearError();
+        return score;
+      }
+
+      function clampScore() {
+        const val = parseFloat(scoreEl.value);
+        if (!isNaN(val)) {
+          if (val < 200) scoreEl.value = 200;
+          if (val > 750) scoreEl.value = 750;
+        }
+      }
+
+      function getRank(score, track) {
+        const table = track === '物理' ? rankTablePhysics : rankTableHistory;
+        const scoreInt = Math.round(score);
+        if (table[scoreInt] !== undefined) {
+          return table[scoreInt];
+        }
+        // 查找最近的分数进行线性插值
+        const scores = Object.keys(table).map(Number).sort((a, b) => a - b);
+        if (scoreInt < scores[0]) return table[scores[0]];
+        if (scoreInt > scores[scores.length - 1]) return table[scores[scores.length - 1]];
+        for (let i = 0; i < scores.length - 1; i++) {
+          if (scoreInt >= scores[i] && scoreInt <= scores[i+1]) {
+            const ratio = (scoreInt - scores[i]) / (scores[i+1] - scores[i]);
+            return Math.round(table[scores[i]] + ratio * (table[scores[i+1]] - table[scores[i]]));
+          }
+        }
+        return table[scores[scores.length - 1]];
+      }
+
+      function calculate() {
+        const score = validate();
+        if (score === null) {
+          summaryEl.classList.remove('visible');
+          resultListsEl.classList.remove('visible');
+          return;
+        }
+
+        const track = trackEl.value;
+        const userRank = getRank(score, track);
+        const data = track === '物理' ? physicsData : historyData;
+
+        rankInfoEl.innerHTML = '您的2026年分数：<strong>' + score + '</strong> 分，对应位次：<strong>' + userRank.toLocaleString() + '</strong> 名';
+        rankInfoEl.classList.add('visible');
+
+        const chong = [];
+        const wen = [];
+        const bao = [];
+
+        for (const m of data) {
+          if (userRank >= m.min_rank * 1.15) {
+            chong.push(m);
+          } else if (userRank * 0.95 <= m.min_rank && m.min_rank <= userRank * 1.05) {
+            wen.push(m);
+          } else if (userRank <= m.min_rank * 0.85) {
+            bao.push(m);
+          }
+        }
+
+        const sortByRank = (a, b) => a.min_rank - b.min_rank;
+        chong.sort(sortByRank);
+        wen.sort(sortByRank);
+        bao.sort(sortByRank);
+
+        renderCategory(listChongEl, chong, 'chong');
+        renderCategory(listWenEl, wen, 'wen');
+        renderCategory(listBaoEl, bao, 'bao');
+
+        countChongEl.textContent = chong.length;
+        countWenEl.textContent = wen.length;
+        countBaoEl.textContent = bao.length;
+
+        summaryEl.classList.add('visible');
+        resultListsEl.classList.add('visible');
+      }
+
+      function renderCategory(container, items, type) {
+        if (items.length === 0) {
+          container.innerHTML = '<div class="empty-state">暂无可匹配专业</div>';
+          return;
+        }
+        container.innerHTML = items.map(item => `
+          <div class="card $<class 'type'>">
+            <div class="card-title">${item.major}</div>
+            <div class="card-requirement">${item.requirement}</div>
+            <div class="card-meta">
+              <span>2025最低分: <strong>${item.min_score}</strong></span>
+              <span>2025最低位次: <strong>${item.min_rank.toLocaleString()}</strong></span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      btnEl.addEventListener('click', calculate);
+      scoreEl.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') calculate();
+      });
+      scoreEl.addEventListener('blur', clampScore);
+    })();
+  </script>
+</body>
+</html>
